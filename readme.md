@@ -20,7 +20,6 @@ Commands start with a `$` and the rest is as usual e.g. `$a1` to place a flat in
 - Run `python3 main.py`
 
 ### ToDo
-- [ ] Fix bug `$2c2+11` where there's a flat and a capston on `c2` and a standing stone north of them. A) the game doesn't execute a drop 1 then drop 1 B) the failed game is left in intermediate state where the stack at `c2` now is gone
 - [ ] Create and configure game commands
   - [ ] Move game to private channel that are just created for these games
   - [ ] Maintain multiple games, one per channel
