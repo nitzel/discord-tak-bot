@@ -1,0 +1,10 @@
+{
+  "editor.formatOnSave": true,
+  "python.formatting.autopep8Args": [
+    "--max-line-length=200"
+  ],
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true,
+    "source.fixAll": true
+  }
+}
