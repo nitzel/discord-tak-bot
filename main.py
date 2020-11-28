@@ -222,7 +222,7 @@ class Board():
         """
           Returns the n=count stacks that start next to x/y in direction. The first one is the direct neighbour of x/y
         """
-        return [self.get_stack(*apply_direction(x, y, direction)) for _ in range(count)]
+        return [self.get_stack(*apply_direction(x, y, direction, i + 1)) for i in range(count)]
 
     def place_stone(self, player: PlayerType, x: int, y: int, stoneType: StoneType) -> None:
         stack = self.get_stack(x, y)
