@@ -10,8 +10,13 @@ from discord.abc import GuildChannel, PrivateChannel
 from PIL import Image, ImageDraw
 from PIL.ImageDraw import Draw
 
+from readconfig import BoardConfig, Config, TakConfig
+
+# Configs are attempted to be read in this order until one succeeds.
+# This allows a dev to have a config that isn't checked in to the repository
+CONFIG_FILES = ["botsettings.dev.json", "botsettings.json"]
+
 BOARD_SIZE = 6  # choose from 3-8
-DISCORD_BOT_TOKEN = '<replace me>'
 
 TILE_WIDTH = 50  # px
 STONE_WIDTH = TILE_WIDTH * 2 // 3  # px
@@ -181,38 +186,29 @@ class PieceReserve():
 
 
 class Board():
-    def __init__(self, board_size: int) -> None:
+    def __init__(self, tak_config: TakConfig, board_size: int) -> None:
         self.board: List[List[Stone]] = [[] for _ in range(board_size * board_size)]
         self.board_size = board_size
+        self.tak_config = tak_config
 
         self.colors: Dict[PlayerType, Tuple[int, int]] = {
             PlayerType.WHITE: (0xf0f0f0, 0xe0e0e0),
             PlayerType.BLACK: (0x606060, 0x404040)
         }
 
+        piece_count = Board._get_piece_count(self.tak_config, self.board_size)
         self.player_reserves: Dict[PlayerType, PieceReserve] = {
-            PlayerType.WHITE: PieceReserve(PlayerType.WHITE, *Board._get_piece_count(board_size)),
-            PlayerType.BLACK: PieceReserve(PlayerType.BLACK, *Board._get_piece_count(board_size)),
+            PlayerType.WHITE: PieceReserve(PlayerType.WHITE, flats=piece_count.flats, caps=piece_count.caps),
+            PlayerType.BLACK: PieceReserve(PlayerType.BLACK, flats=piece_count.flats, caps=piece_count.caps),
         }
 
         self.next_player = PlayerType.WHITE
         self.initial_moves = True  # The first two pieces are played with opponent's pieces
 
-    def _get_piece_count(board_size) -> Tuple[int, int]:
-        """
-        Returns `(flatCount, capstoneCount)`
-        """
-        defaults = {
-            3: (10, 0),
-            4: (15, 0),
-            5: (21, 1),
-            6: (30, 1),
-            7: (40, 2),
-            8: (70, 2),
-        }
-        if defaults.get(board_size):
-            return defaults[board_size]
-        raise ValueError(f"Board size '{board_size}' is not supported")
+    def _get_piece_count(tak_config: TakConfig, board_size: int) -> BoardConfig:
+        if tak_config.boards.get(board_size):
+            return tak_config.boards.get(board_size)
+        raise ValueError(f"Board size '{board_size}' is not supported. Supported board sizes are: {list(tak_config.boards.keys())}")
 
     def get_dimensions(self) -> Tuple[int, int]:
         return self.board_size * TILE_WIDTH, self.board_size * TILE_WIDTH
@@ -346,24 +342,24 @@ def parse_move(command: str) -> Move:
     raise ParseMoveError(f"Unrecognized move '{command}'")
 
 
-# TODO convert these to tests
-# # Placements
-print(parse_move("Ce1"))
-print(parse_move("Fa3"))
-print(parse_move("Sf5"))
-print(parse_move(" d4"))
-# # Moves
-print(parse_move("a3>"))
-print(parse_move("a3<"))
-print(parse_move("a3+"))
-print(parse_move("a3-"))
-print(parse_move("5a3>212"))
-print(parse_move("7a3<115"))
-print(parse_move("7a3<"))
-print(parse_move("a3<324"))
+# # TODO convert these to tests
+# # # Placements
+# print(parse_move("Ce1"))
+# print(parse_move("Fa3"))
+# print(parse_move("Sf5"))
+# print(parse_move(" d4"))
+# # # Moves
+# print(parse_move("a3>"))
+# print(parse_move("a3<"))
+# print(parse_move("a3+"))
+# print(parse_move("a3-"))
+# print(parse_move("5a3>212"))
+# print(parse_move("7a3<115"))
+# print(parse_move("7a3<"))
+# print(parse_move("a3<324"))
 
-board = Board(BOARD_SIZE)
 # TODO convert these to tests
+# board = Board(BOARD_SIZE)
 # board.do_move(PlayerType.WHITE, parse_move("a1"))
 # board.do_move(PlayerType.BLACK, parse_move("a2"))
 # board.do_move(PlayerType.WHITE, parse_move("a3"))
@@ -374,8 +370,6 @@ board = Board(BOARD_SIZE)
 #   board.draw(draw)
 #   im.show()
 # exit(0)
-
-client = discord.Client()
 
 
 async def send_board_image(board: Board, channel: Union[GuildChannel, PrivateChannel], content: str = None):
@@ -393,27 +387,51 @@ async def send_board_image(board: Board, channel: Union[GuildChannel, PrivateCha
 
 
 class MyClient(discord.Client):
-    async def on_ready(self):
-        print('Logged on as {self.user}!')
+    def __init__(self, tak_config: TakConfig):
+        super().__init__()
+        self.tak_config = tak_config
+        self.board = Board(self.tak_config, 6)
 
-    async def on_message(self, message):
+    async def on_ready(self):
+        print(f'Logged on as {self.user}!')
+
+    async def on_message(self, message: discord.Message):
         print(f'Message from {message.author} on channel id {message.channel.id}: {message.content}')
-        if message.author == client.user:
+        if message.author == self.user:
             return
 
         if message.content.startswith('$'):
+            command = message.content[1:]
+            board = self.board
+            if command == "show":
+                await send_board_image(board, message.channel, f"{self.board.next_player.value} is next")
+                return await message.delete()
+
             try:
-                move = parse_move(message.content[1:])
+                move = parse_move(command)
                 print(f"Parsed move {move}")
                 try:
                     board.do_move(board.next_player, move)
                     await send_board_image(board, message.channel, f"{message.author.mention} executed move {move}")
-                    await message.delete()
+                    return await message.delete()
                 except InvalidMoveError as error:
-                    await message.channel.send(f"Failed to apply move {move}: {error}", delete_after=60)
+                    return await message.channel.send(f"Failed to apply move {move}: {error}", delete_after=60)
             except ParseMoveError as error:
-                await message.channel.send(f"Failed to parse command {message.content}: {error}", delete_after=60)
+                return await message.channel.send(f"Failed to parse command {message.content}: {error}", delete_after=60)
 
 
-client = MyClient()
-client.run(DISCORD_BOT_TOKEN)
+if __name__ == "__main__":
+    config = None
+    for config_file in CONFIG_FILES:
+        print(f"Attempting to read config from '{config_file}'")
+        try:
+            config = Config.load(config_file)
+            print(f"Successfully read config from '{config_file}'")
+            break
+        except FileNotFoundError:
+            print(f"Cannot read config from '{config_file}' because it does not exist'")
+    if not config:
+        exit("Failed read configuration")
+
+    client = MyClient(config.tak)
+    client.run(config.discord.token)

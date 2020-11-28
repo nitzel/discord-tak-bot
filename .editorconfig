@@ -1,4 +1,5 @@
 root = true
+
 [*]
 indent_style = space
 tab_width = 2
@@ -6,3 +7,6 @@ trim_trailing_whitespace = true
 insert_final_newline = true
 charset = utf-8
 end_of_line = lf
+
+[*.py]
+tab_width = 4
