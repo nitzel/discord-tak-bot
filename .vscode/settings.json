@@ -1,10 +1,13 @@
 {
   "editor.formatOnSave": true,
-  "python.formatting.autopep8Args": [
-    "--max-line-length=200"
-  ],
   "editor.codeActionsOnSave": {
     "source.organizeImports": true,
     "source.fixAll": true
   },
+  "python.formatting.autopep8Args": [
+    "--max-line-length=200"
+  ],
+  "python.languageServer": "Pylance",
+  "python.analysis.diagnosticMode": "workspace",
+  "python.analysis.typeCheckingMode": "strict",
 }

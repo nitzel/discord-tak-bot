@@ -8,18 +8,31 @@ Commands start with a `$` and the rest is as usual e.g. `$a1` to place a flat in
 
 ### How to run
 #### Requirements
-- A discord bot token
-  - Privileges
-    - *todo*
-- Add the bot to your server
-- Python3
-  - DiscordPy
-  - PIL
-  - BytesIO
-  - *todo*
+- A discord bot token [how to create a bot](https://discordpy.readthedocs.io/en/latest/discord.html)
+- Bot access to your server with the following priviliges
+  - Go to [discord apps](https://discord.com/developers/applications), select your app, go to `OAuth2` and in the URL generator set
+    - `scope=bot`
+    - `Bot Permissions`
+      - `General`
+        - `Manage Channels`
+        - `Create Instant Invite`
+      - `Text Permissions`
+        - `Send Messages`
+        - `Manage Messages`
+        - `Embed Links`
+        - `Attach Files`
+  - Visit the generated URL, select the server you want the bot to have access to and grant it
+- Python3 `3.7.6` (I'm not very versed around python's versioning and compatibility, these are just the versions I use)
+  - `discord.py 1.5.1`
+  - `discord.py-stubs 1.5.1.2` (types, recommended for development only)
+  - `Pillow 7.0.0` (PIL / Python Image Library)
+
+#### Run
+- Configure `botsettings.json` with your bot token
+  - If you are a dev, create a copy of `botsettings.json` called `botsettings.dev.json` which will be ignored by git.
 - Run `python3 main.py`
 
-### ToDo
+### TODO
 - [ ] Create and configure game commands
   - [ ] Move game to private channel that are just created for these games
   - [ ] Maintain multiple games, one per channel

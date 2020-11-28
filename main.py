@@ -3,12 +3,10 @@ from __future__ import annotations
 import re
 from enum import Enum
 from io import BytesIO
-from typing import Dict, List, Tuple, TypeVar, Union
+from typing import Dict, List, Tuple, TypeVar
 
 import discord
-from discord.abc import GuildChannel, PrivateChannel
 from PIL import Image, ImageDraw
-from PIL.ImageDraw import Draw
 
 from readconfig import BoardConfig, Config, TakConfig
 
@@ -86,11 +84,11 @@ class Move():
         if len(x) != 1:
             raise ValueError(f"x must be a single character but was '{x}'")
 
-        y = int(y)
-        if y not in range(1, 10):
+        iy = int(y)
+        if iy not in range(1, 10):
             raise ValueError(f"y must be number in [1, 9] but was '{y}'")
         self.x = x
-        self.y = y
+        self.y = iy
 
     def get_xy(self) -> Tuple[int, int]:
         """
@@ -100,7 +98,7 @@ class Move():
 
 
 class PlaceStone(Move):
-    def __init__(self, x: str, y: int, stoneType: StoneType):
+    def __init__(self, x: str, y: str, stoneType: StoneType):
         super().__init__(x, y)
         self.stoneType = stoneType
 
@@ -110,7 +108,7 @@ class PlaceStone(Move):
 
 
 class MoveStack(Move):
-    def __init__(self, x: str, y: int, direction: Direction, pickup: int = None, droppings: List[int] = None):
+    def __init__(self, x: str, y: str, direction: Direction, pickup: int | None = None, droppings: List[int] | None = None):
         """
         pickup=None means all/the entire stack
         droppings=None means all carried
@@ -136,7 +134,7 @@ class Stone():
         self.player = player
         self.stoneType = stoneType
 
-    def draw(self, draw: Draw, offset: Tuple[int, int], colors: Dict[PlayerType, Tuple[int, int]]):
+    def draw(self, draw: ImageDraw.ImageDraw, offset: Tuple[int, int], colors: Dict[PlayerType, Tuple[int, int]]):
         fill, outline = colors[self.player]
 
         x, y = offset
@@ -205,9 +203,11 @@ class Board():
         self.next_player = PlayerType.WHITE
         self.initial_moves = True  # The first two pieces are played with opponent's pieces
 
+    @staticmethod
     def _get_piece_count(tak_config: TakConfig, board_size: int) -> BoardConfig:
-        if tak_config.boards.get(board_size):
-            return tak_config.boards.get(board_size)
+        piece_count = tak_config.boards.get(board_size)
+        if piece_count:
+            return piece_count
         raise ValueError(f"Board size '{board_size}' is not supported. Supported board sizes are: {list(tak_config.boards.keys())}")
 
     def get_dimensions(self) -> Tuple[int, int]:
@@ -288,7 +288,7 @@ class Board():
             self.initial_moves = False
         self.next_player = get_opponent(self.next_player)
 
-    def draw(self, draw: Draw, offset: Tuple[int, int] = (0, 0)):
+    def draw(self, draw: ImageDraw.ImageDraw, offset: Tuple[int, int] = (0, 0)):
         for iy in range(self.board_size):
             for ix in range(self.board_size):
                 color = "gray" if (ix + iy) % 2 == 0 else "blue"
@@ -297,27 +297,27 @@ class Board():
                 rectangle = [x, y, x + TILE_WIDTH, y + TILE_WIDTH]
                 draw.rectangle(rectangle, fill=color, width=0)
 
-                stone_offset = (TILE_WIDTH - STONE_WIDTH) / 2
+                stone_offset = (TILE_WIDTH - STONE_WIDTH) // 2
 
                 vertical_lift = 5
                 stones = self.get_stack(ix, iy)
-                y_add = len(stones) / 2 * vertical_lift  # todo make sure we're not exiting the field
+                y_add = len(stones) // 2 * vertical_lift  # todo make sure we're not exiting the field
                 for i, stone in enumerate(stones):
-                    stone.draw(draw, [x + stone_offset, y + stone_offset + y_add - i * vertical_lift], self.colors)
+                    stone.draw(draw, (x + stone_offset, y + stone_offset + y_add - i * vertical_lift), self.colors)
 
 
 REGEX_STONE_TYPE = "(?P<stoneType>[CSF])"  # Type of the stone to put down
 REGEX_POSITION = "(?P<x>[a-z])(?P<y>[1-9])"  # x/y position TODO limit to 8x8?
 
 REGEX_PICKUP = "(?P<pickup>[1-9][0-9]*)"  # Number of stones to pick up
-REGEX_DIRECTION = "(?P<direction>[\<\>\+\-])"  # Direction of a move
+REGEX_DIRECTION = r"(?P<direction>[\<\>\+\-])"  # Direction of a move
 REGEX_DROPPINGS = "(?P<droppings>[1-9]+)"  # Number of stones dropped per field
 
 # TODO add parsing for remarks like ? (questionable move), ! (surprise/good move), ?? ? ?! !? ! !!
 #   ' (tak threat) and * (capstone flattens standing stone)
 #   { this is a comment } (comments in curly braces)
-REGEX_MOVE_STACK = re.compile(f"^\s*{REGEX_PICKUP}?{REGEX_POSITION}{REGEX_DIRECTION}{REGEX_DROPPINGS}?")
-REGEX_PLACE_STONE = re.compile(f"^\s*{REGEX_STONE_TYPE}?{REGEX_POSITION}")
+REGEX_MOVE_STACK = re.compile(rf"^\s*{REGEX_PICKUP}?{REGEX_POSITION}{REGEX_DIRECTION}{REGEX_DROPPINGS}?")
+REGEX_PLACE_STONE = re.compile(rf"^\s*{REGEX_STONE_TYPE}?{REGEX_POSITION}")
 
 
 def parse_move(command: str) -> Move:
@@ -328,16 +328,15 @@ def parse_move(command: str) -> Move:
         pickup = int(groups["pickup"]) if groups["pickup"] else None
         droppings = list(map(lambda char: int(char), groups["droppings"])) if groups["droppings"] else None
         direction = Direction(groups["direction"])
-        y = int(groups["y"])
-        return MoveStack(groups["x"], y, direction=direction, pickup=pickup, droppings=droppings)
+
+        return MoveStack(groups["x"], groups["y"], direction=direction, pickup=pickup, droppings=droppings)
 
     match = REGEX_PLACE_STONE.match(command)
     if match is not None:
         groups = match.groupdict()
 
-        y = int(groups["y"])
         stoneType = StoneType(groups["stoneType"]) if groups["stoneType"] else StoneType.FLAT
-        return PlaceStone(groups["x"], y, stoneType=stoneType)
+        return PlaceStone(groups["x"], groups["y"], stoneType=stoneType)
 
     raise ParseMoveError(f"Unrecognized move '{command}'")
 
@@ -371,11 +370,10 @@ def parse_move(command: str) -> Move:
 #   im.show()
 # exit(0)
 
-
-async def send_board_image(board: Board, channel: Union[GuildChannel, PrivateChannel], content: str = None):
+async def send_board_image(board: Board, channel: discord.abc.Messageable, content: str = ""):
     embed = discord.Embed(title="Game State", description=content, color=0xfc9a04)
     with Image.new("RGB", board.get_dimensions(), "white") as im:
-        draw = ImageDraw.Draw(im)
+        draw: ImageDraw.ImageDraw = ImageDraw.ImageDraw(im)
         board.draw(draw)
         with BytesIO() as image_binary:
             im.save(image_binary, 'PNG')
@@ -391,6 +389,18 @@ class MyClient(discord.Client):
         super().__init__()
         self.tak_config = tak_config
         self.board = Board(self.tak_config, 6)
+
+        # # Prepare board
+        # moves = [
+        #     "a2", "a1",
+        #     "b1", "a2-",
+        #     "b1<", "b1",
+        #     "Ca2", "b2",
+        #     "a2-", "b3",
+        #     "3a1>111"
+        # ]
+        # for move in moves:
+        #     self.board.do_move(self.board.next_player, parse_move(move))
 
     async def on_ready(self):
         print(f'Logged on as {self.user}!')

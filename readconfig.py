@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import Dict, TypeVar
+from typing import Any, Dict, TypeVar
 
 T = TypeVar("T")
 
@@ -43,16 +43,18 @@ class Config():
     def __str__(self):
         return f"[Config {self.discord} {self.tak}"
 
+    @staticmethod
     def load(filename: str) -> Config:
-        def as_config(dct: Dict):
+        def as_config(dct: Dict[str, Any | Dict[str, BoardConfig]]):
             if dct.get("token"):
                 return DiscordConfig(**dct)
             if dct.get("flats"):
                 return BoardConfig(**dct)
-            if dct.get("boards"):
-                return TakConfig(boards=index_dict_by_int(dct["boards"]))
             if dct.get("discord"):
                 return Config(**dct)
+            boards = dct.get("boards")
+            if isinstance(boards, dict):
+                return TakConfig(boards=index_dict_by_int(boards))
             if type(list(dct.values())[0]) == BoardConfig:
                 return dct
             raise ValueError(f"Unexpected object {dct}")
