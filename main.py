@@ -225,6 +225,9 @@ class Board():
         return [self.get_stack(*apply_direction(x, y, direction, i + 1)) for i in range(count)]
 
     def place_stone(self, player: PlayerType, x: int, y: int, stoneType: StoneType) -> None:
+        if self.initial_moves and stoneType != StoneType.FLAT:
+            raise InvalidMoveError("Only flats can be placed during the first turn.")
+
         stack = self.get_stack(x, y)
         if len(stack) > 0:
             raise InvalidMoveError("Stones can only be placed on empty fields")
