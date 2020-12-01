@@ -1,8 +1,6 @@
-import pytest
-
 from mytypes import PlayerType, StoneType
 
-from .stone import Stone
+from . import Stone
 
 
 def test_flatten_does_not_affect_stone():

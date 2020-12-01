@@ -3,7 +3,7 @@ import pytest
 from board.helpers.stone import Stone
 from mytypes import InvalidMoveError, PlayerType, StoneType
 
-from .piecereserve import PieceReserve
+from . import PieceReserve
 
 
 @pytest.mark.parametrize("caps", [-1, -5])

@@ -1,8 +1,8 @@
 import pytest
 
-from moves import Move, PlaceStone, parse_move
-from moves.moves import MoveStack
 from mytypes import Direction, ParseMoveError, StoneType
+
+from . import Move, MoveStack, PlaceStone, parse_move
 
 
 class TestParseMove:

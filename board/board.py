@@ -168,17 +168,3 @@ class Board():
                 y_add = len(stones) // 2 * vertical_lift  # todo make sure we're not exiting the field
                 for i, stone in enumerate(stones):
                     stone.draw(draw, (x + stone_offset, y + stone_offset + y_add - i * vertical_lift), self.colors, STONE_WIDTH)
-
-
-# TODO convert these to tests
-# board = Board(BOARD_SIZE)
-# board.do_move(PlayerType.WHITE, parse_move("a1"))
-# board.do_move(PlayerType.BLACK, parse_move("a2"))
-# board.do_move(PlayerType.WHITE, parse_move("a3"))
-# board.do_move(PlayerType.BLACK, parse_move("a4"))
-# Show the rendered board in an image viewer
-# with Image.new("RGB", board.get_dimensions(), "white") as im:
-#   draw = ImageDraw.Draw(im)
-#   board.draw(draw)
-#   im.show()
-# exit(0)
