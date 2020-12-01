@@ -31,16 +31,27 @@ Moving a stack could be `$5b3>212`.
   - For devs
     - `discord.py-stubs 1.5.1.2` (types, recommended for development only)
   - If you're using anaconda which is still on `Python 3.7.6` and
-```
-conda create -n py39 python=3.9
-conda activate py39
-pip install discord.py discord.py-stubs Pillow pytest
-```
+    ```
+    conda create -n py39 python=3.9
+    conda activate py39
+    pip install discord.py discord.py-stubs Pillow pytest
+    ```
 
 #### Run
 - Configure `botsettings.json` with your bot token
   - If you are a dev, you may a copy of `botsettings.json` called `botsettings.dev.json` and edit it as it will be ignored by git.
 - Run `python3 .` in the root of the repository.
+
+#### Test (for devs)
+- Run `pytest` or `python -m pytest` in the root folder
+- Or utilize VS Codes Test Explorer
+  - It could be worth to add the following to your `ctrl+shift+p Keyboard Shortcuts (JSON)` to easily re-run them
+    ```
+    {
+      "key": "ctrl+r ctrl+a",
+      "command": "python.runtests"
+    },
+    ```
 
 ### TODO
 - [ ] Commands to create and configure games
