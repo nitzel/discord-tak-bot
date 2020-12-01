@@ -93,7 +93,7 @@ class Board():
         if len(stack) > 0:
             raise InvalidMoveError("Stones can only be placed on empty fields")
 
-        stone = self.player_reserves[player].take(stoneType=stoneType)
+        stone = self.player_reserves[player].take(stone_type=stoneType)
         stack.append(stone)
 
     def do_move(self, acting_player: PlayerType, move: Move) -> None:

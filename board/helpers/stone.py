@@ -35,3 +35,7 @@ class Stone():
         if self.stoneType != StoneType.STANDING:
             raise InvalidMoveError(f"Cannot flatten a {self.stoneType} stone")
         return Stone(self.player, StoneType.FLAT)
+
+    def __eq__(self, other):
+        return isinstance(other, Stone)\
+            and self.stoneType == other.stoneType

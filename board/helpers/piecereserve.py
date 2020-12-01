@@ -1,6 +1,6 @@
 from __future__ import annotations
-from board.helpers.stone import Stone
 
+from board.helpers.stone import Stone
 from mytypes import InvalidMoveError, PlayerType, StoneType
 
 
@@ -14,20 +14,20 @@ class PieceReserve():
         self.caps = caps
         self.player = player
 
-    def has(self, stoneType: StoneType) -> bool:
-        if stoneType == StoneType.CAPSTONE:
+    def has(self, stone_type: StoneType) -> bool:
+        if stone_type == StoneType.CAPSTONE:
             return self.caps > 0
-        if stoneType == StoneType.FLAT or stoneType == StoneType.STANDING:
+        if stone_type == StoneType.FLAT or stone_type == StoneType.STANDING:
             return self.flats > 0
-        raise ValueError(f"Cannot play unknown stone of type '{stoneType}'")
+        raise ValueError(f"Cannot play unknown stone of type '{stone_type}'")
 
-    def take(self, stoneType: StoneType) -> Stone:
-        if not self.has(stoneType):
+    def take(self, stone_type: StoneType) -> Stone:
+        if not self.has(stone_type):
             raise InvalidMoveError(f"Player '{self.player}' does not have sufficient pieces")
 
-        if stoneType == StoneType.CAPSTONE:
+        if stone_type == StoneType.CAPSTONE:
             self.caps -= 1
-        elif stoneType == StoneType.FLAT or stoneType == StoneType.STANDING:
+        elif stone_type == StoneType.FLAT or stone_type == StoneType.STANDING:
             self.flats -= 1
 
-        return Stone(player=self.player, stoneType=stoneType)
+        return Stone(player=self.player, stoneType=stone_type)
