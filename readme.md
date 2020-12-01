@@ -5,6 +5,8 @@ This bot takes messages with commands in [Portable Tak Notation](https://ustak.o
 
 ### How to play
 Commands start with a `$` and the rest is as usual e.g. `$a1` to place a flat in the lower left corner or `$f6` for the top right one.
+Moving a stack could be `$5b3>212`.
+
 
 ### How to run
 #### Requirements
@@ -24,16 +26,18 @@ Commands start with a `$` and the rest is as usual e.g. `$a1` to place a flat in
   - Visit the generated URL, select the server you want the bot to have access to and grant it
 - Python3 `3.7.6` (I'm not very versed around python's versioning and compatibility, these are just the versions I use)
   - `discord.py 1.5.1`
-  - `discord.py-stubs 1.5.1.2` (types, recommended for development only)
   - `Pillow 7.0.0` (PIL / Python Image Library)
+  - `pytest 6.1.2`
+  - For devs
+    - `discord.py-stubs 1.5.1.2` (types, recommended for development only)
 
 #### Run
 - Configure `botsettings.json` with your bot token
-  - If you are a dev, create a copy of `botsettings.json` called `botsettings.dev.json` which will be ignored by git.
-- Run `python3 main.py`
+  - If you are a dev, you may a copy of `botsettings.json` called `botsettings.dev.json` and edit it as it will be ignored by git.
+- Run `python3 .` in the root of the repository.
 
 ### TODO
-- [ ] Create and configure game commands
+- [ ] Commands to create and configure games
   - [ ] Move game to private channel that are just created for these games
   - [ ] Maintain multiple games, one per channel
   - [ ] Create certain gamestate from PTN as a starting point for the game
