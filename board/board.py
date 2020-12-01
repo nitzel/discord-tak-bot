@@ -138,10 +138,10 @@ class Board():
             drop_stacks = self.get_stacks(x, y, move.direction, drop_reach)
             for stack, stones in zip(drop_stacks, dropped_stones):
                 top_stone = stack[-1] if len(stack) > 0 else None
-                dropping_capstone_only = stones[0].stoneType == StoneType.CAPSTONE
-                if top_stone and top_stone.stoneType == StoneType.CAPSTONE:
+                dropping_capstone_only = stones[0].type == StoneType.CAPSTONE
+                if top_stone and top_stone.type == StoneType.CAPSTONE:
                     raise InvalidMoveError("Can't drop stones on a {top_stone.stoneType}")
-                if top_stone and top_stone.stoneType == StoneType.STANDING:
+                if top_stone and top_stone.type == StoneType.STANDING:
                     if dropping_capstone_only:
                         stack[-1] = top_stone.flatten()
                     else:

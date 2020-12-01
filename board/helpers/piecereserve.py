@@ -30,4 +30,4 @@ class PieceReserve():
         elif stone_type == StoneType.FLAT or stone_type == StoneType.STANDING:
             self.flats -= 1
 
-        return Stone(player=self.player, stoneType=stone_type)
+        return Stone(player=self.player, stone_type=stone_type)
