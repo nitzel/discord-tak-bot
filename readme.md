@@ -24,12 +24,18 @@ Moving a stack could be `$5b3>212`.
         - `Embed Links`
         - `Attach Files`
   - Visit the generated URL, select the server you want the bot to have access to and grant it
-- Python3 `3.7.6` (I'm not very versed around python's versioning and compatibility, these are just the versions I use)
+- Python3 `3.9.0` (I'm not very versed around python's versioning and compatibility, these are just the versions I use)
   - `discord.py 1.5.1`
-  - `Pillow 7.0.0` (PIL / Python Image Library)
+  - `Pillow 8.0.1` (PIL / Python Image Library)
   - `pytest 6.1.2`
   - For devs
     - `discord.py-stubs 1.5.1.2` (types, recommended for development only)
+  - If you're using anaconda which is still on `Python 3.7.6` and
+```
+conda create -n py39 python=3.9
+conda activate py39
+pip install discord.py discord.py-stubs Pillow pytest
+```
 
 #### Run
 - Configure `botsettings.json` with your bot token

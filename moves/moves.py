@@ -10,10 +10,13 @@ class Move():
     def __init__(self, x: str, y: str):
         if len(x) != 1:
             raise ValueError(f"x must be a single character but was '{x}'")
+        if x < 'a' or x > 'i':
+            raise ValueError(f"x must be a letter [a-i] but was '{x}'")
 
         iy = int(y)
         if iy not in range(1, 10):
             raise ValueError(f"y must be number in [1, 9] but was '{y}'")
+
         self.x = x
         self.y = iy
 
@@ -22,6 +25,14 @@ class Move():
         Returns x and y as zero based indices
         """
         return ord(self.x) - ord('a'), self.y - 1
+
+    def __eq__(self, other) -> bool:
+        return isinstance(other, Move)\
+            and self.x == other.x\
+            and self.y == other.y
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class PlaceStone(Move):
@@ -32,6 +43,11 @@ class PlaceStone(Move):
     def __str__(self):
         stoneType = "" if self.stoneType == StoneType.FLAT else self.stoneType.value
         return f"PLACE {stoneType}{self.x}{self.y}"
+
+    def __eq__(self, other) -> bool:
+        return isinstance(other, PlaceStone)\
+            and super().__eq__(other)\
+            and self.stoneType == other.stoneType
 
 
 class MoveStack(Move):
@@ -50,13 +66,19 @@ class MoveStack(Move):
         droppings = "".join(str(drop) for drop in self.droppings) if self.droppings else ""
         return f"MOVE {pickup}{self.x}{self.y}{self.direction.value}{droppings}"
 
+    def __eq__(self, other) -> bool:
+        return isinstance(other, MoveStack)\
+            and super().__eq__(other)\
+            and self.direction == other.direction\
+            and self.pickup == other.pickup\
+            and self.droppings == other.droppings\
 
 REGEX_STONE_TYPE = "(?P<stoneType>[CSF])"  # Type of the stone to put down
 REGEX_POSITION = "(?P<x>[a-z])(?P<y>[1-9])"  # x/y position TODO limit to 8x8?
 
-REGEX_PICKUP = "(?P<pickup>[1-9][0-9]*)"  # Number of stones to pick up
+REGEX_PICKUP = "(?P<pickup>[1-9])"  # Number of stones to pick up, never more than board size so <10
 REGEX_DIRECTION = r"(?P<direction>[\<\>\+\-])"  # Direction of a move
-REGEX_DROPPINGS = "(?P<droppings>[1-9]+)"  # Number of stones dropped per field
+REGEX_DROPPINGS = "(?P<droppings>[0-9]+)"  # Number of stones dropped per field. Needs checking that 0 fails for accidental mistypes
 
 # TODO add parsing for remarks like ? (questionable move), ! (surprise/good move), ?? ? ?! !? ! !!
 #   ' (tak threat) and * (capstone flattens standing stone)
@@ -74,6 +96,9 @@ def parse_move(command: str) -> Move:
         droppings = list(map(lambda char: int(char), groups["droppings"])) if groups["droppings"] else None
         direction = Direction(groups["direction"])
 
+        if droppings and 0 in droppings:
+            raise ParseMoveError(f"Move {command} contains '0' droppings {droppings} but at least one stone must be dropped per field")
+
         return MoveStack(groups["x"], groups["y"], direction=direction, pickup=pickup, droppings=droppings)
 
     match = REGEX_PLACE_STONE.match(command)
@@ -85,19 +110,3 @@ def parse_move(command: str) -> Move:
 
     raise ParseMoveError(f"Unrecognized move '{command}'")
 
-
-# # TODO convert these to tests
-# # # Placements
-# print(parse_move("Ce1"))
-# print(parse_move("Fa3"))
-# print(parse_move("Sf5"))
-# print(parse_move(" d4"))
-# # # Moves
-# print(parse_move("a3>"))
-# print(parse_move("a3<"))
-# print(parse_move("a3+"))
-# print(parse_move("a3-"))
-# print(parse_move("5a3>212"))
-# print(parse_move("7a3<115"))
-# print(parse_move("7a3<"))
-# print(parse_move("a3<324"))

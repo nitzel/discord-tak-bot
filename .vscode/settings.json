@@ -1,16 +1,21 @@
 {
   "files.exclude": {
     "**/__pycache__": true,
+    "**/.pytest_cache": true
   },
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.organizeImports": true,
-    "source.fixAll": true
+    "source.fixAll": true,
   },
   "python.formatting.autopep8Args": [
     "--max-line-length=200"
   ],
   "python.languageServer": "Pylance",
   "python.analysis.diagnosticMode": "workspace",
-  "python.analysis.typeCheckingMode": "strict",
+  "python.analysis.typeCheckingMode": "basic",
+  "python.testing.unittestEnabled": false,
+  "python.testing.nosetestsEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "python.testing.autoTestDiscoverOnSaveEnabled": true,
 }
