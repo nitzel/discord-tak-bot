@@ -5,10 +5,10 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Python: Current File",
+      "name": "Python: Project",
       "type": "python",
       "request": "launch",
-      "program": "${file}",
+      "program": ".",
       "console": "integratedTerminal"
     },
     {
@@ -17,6 +17,6 @@
       "request": "test",
       "console": "integratedTerminal",
       "justMyCode": false
-    }
+    },
   ]
 }
