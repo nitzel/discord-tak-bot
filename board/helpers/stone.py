@@ -9,11 +9,6 @@ from mytypes import InvalidMoveError, PlayerType, StoneType
 
 class Stone():
     def __init__(self, player: PlayerType, stone_type: StoneType):
-        if type(player) != PlayerType:
-            raise TypeError(f"player must be {PlayerType}", player)
-        if type(stone_type) != StoneType:
-            raise TypeError(f"stoneType must be {StoneType}", stone_type)
-
         self.player = player
         self.type = stone_type
 
