@@ -35,3 +35,6 @@ class Stone():
         return isinstance(other, Stone)\
             and self.player == other.player\
             and self.type == other.type
+
+    def __repr__(self):
+        return f"[{self.player.name} {self.type.name}]"
