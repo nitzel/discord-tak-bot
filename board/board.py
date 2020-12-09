@@ -98,7 +98,7 @@ class Board():
 
     def do_move(self, acting_player: PlayerType, move: Move) -> None:
         if acting_player != self.next_player:
-            raise InvalidMoveError("It's {self.next_player}'s turn")
+            raise InvalidMoveError(f"It's {self.next_player}'s turn")
 
         # switch to opponent stones if still in the initial move sequence
         player = acting_player if not self.initial_moves else get_opponent(acting_player)

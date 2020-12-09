@@ -4,9 +4,19 @@ This bot takes messages with commands in [Portable Tak Notation](https://ustak.o
 ![Screenshot](readme/screenshot.png)
 
 ### How to play
-Commands start with a `$` and the rest is as usual e.g. `$a1` to place a flat in the lower left corner or `$f6` for the top right one.
-Moving a stack could be `$5b3>212`.
 
+- `$create -s3|4|5|6|7|8 -white|black|random -public|secret`
+  - `-sn` with `n` being the board size
+  - `-white` or `-black` or `-random`: The colour you as the game creator want to have
+  - Optional `-public` `-secret`
+    - `-public` everyone can read and write messages.
+    - `-secret` only you and your opponent can see the channel. **Only you can invite others**.
+    - Default: **Everyone can see** the channel and read messages but **only you and your opponent can write messages**.
+- `$show` Shows the game of the current channel and who's turn it is
+- Doing game moves
+  - You must be in a channel with a game, one of the players and it must be your turn
+  - Commands start with a `$` and the rest is as usual e.g. `$a1` to place a flat in the lower left corner or `$f6` for the top right one
+  - Moving a stack would be `$5b3>212`
 
 ### How to run
 #### Requirements
@@ -55,10 +65,12 @@ Moving a stack could be `$5b3>212`.
 
 ### TODO
 - [ ] Commands to create and configure games
-  - [ ] Move game to private channel that are just created for these games
-  - [ ] Maintain multiple games, one per channel
+  - [x] Move game to private channel that are just created for these games
+    - [ ] Clean up code
+  - [x] Maintain multiple games, one per channel
+    - [ ] Clean up code
   - [ ] Create certain gamestate from PTN as a starting point for the game
-- [ ] Let users only play their own color
+- [x] Let users only play their own color
 - [ ] If a move fails the board may be left in a half-way state
   - This can happen when moving a stack and part of that is dropping stones on standing/cap stones. This aborts the move but it doesn't undo what has already happened.
 - [ ] Persist game state between restarts
