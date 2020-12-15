@@ -9,7 +9,6 @@ from discord import mentions
 from discord.channel import TextChannel
 from PIL import Image, ImageDraw
 
-import board
 from board import Board
 from moves import parse_move
 from mytypes import InvalidMoveError, ParseMoveError, PlayerType, get_opponent
